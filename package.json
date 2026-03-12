@@ -1,0 +1,32 @@
+{
+  "name": "taobin-inventory",
+  "version": "1.0.0",
+  "description": "LAN Server Warehouse Inventory System for Tao Bin Malaysia",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "keywords": [
+    "inventory",
+    "warehouse",
+    "taobin",
+    "lan-server"
+  ],
+  "author": "Tao Bin Malaysia",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
