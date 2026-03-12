@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
     `).all();
     res.json(categories);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -28,6 +29,7 @@ router.get('/:id', (req, res) => {
     if (!category) return res.status(404).json({ error: 'Category not found' });
     res.json(category);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -45,6 +47,7 @@ router.post('/', (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Category name already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -66,6 +69,7 @@ router.put('/:id', (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Category name already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -79,6 +83,7 @@ router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
     res.json({ message: 'Category deleted' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });

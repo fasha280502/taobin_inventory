@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
+if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'test') {
+  console.error('FATAL: JWT_SECRET environment variable is not set. Set it in .env.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'test-only-secret';
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;

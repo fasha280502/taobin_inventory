@@ -14,6 +14,7 @@ router.get('/', requireAdmin, (req, res) => {
     ).all();
     res.json(users);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -39,6 +40,7 @@ router.post('/', requireAdmin, (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Username already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -73,6 +75,7 @@ router.put('/:id', requireAdmin, (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Username already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });

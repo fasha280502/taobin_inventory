@@ -30,6 +30,7 @@ router.get('/stats', (req, res) => {
       todayOut
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -46,6 +47,7 @@ router.get('/low-stock', (req, res) => {
     `).all();
     res.json(products);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -63,6 +65,7 @@ router.get('/recent-transactions', (req, res) => {
     `).all();
     res.json(transactions);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });

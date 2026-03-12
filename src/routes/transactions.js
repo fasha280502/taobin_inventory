@@ -38,6 +38,7 @@ router.get('/', (req, res) => {
     const transactions = db.prepare(sql).all(...params);
     res.json(transactions);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -85,6 +86,7 @@ router.post('/', (req, res) => {
 
     res.status(201).json(transaction);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });

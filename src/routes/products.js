@@ -38,6 +38,7 @@ router.get('/', (req, res) => {
     const products = db.prepare(sql).all(...params);
     res.json(products);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -54,6 +55,7 @@ router.get('/:id', (req, res) => {
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json(product);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -75,6 +77,7 @@ router.post('/', (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'SKU already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -99,6 +102,7 @@ router.put('/:id', (req, res) => {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'SKU already exists' });
     }
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -112,6 +116,7 @@ router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
     res.json({ message: 'Product deleted' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
