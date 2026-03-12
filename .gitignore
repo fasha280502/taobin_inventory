@@ -1,5 +1,8 @@
 node_modules/
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
 .env
 coverage/
 *.log
