@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tao Bin Malaysia – Warehouse Inventory System</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+
+  <!-- Bootstrap 5 (vendored for LAN use) -->
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <!-- Font Awesome (vendored for LAN use) -->
+  <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     AUTH PAGE
+     ============================================================ -->
+<div id="auth-page" style="display:flex">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div style="font-size:3rem;margin-bottom:0.5rem">☕</div>
+      <h1>Tao Bin Malaysia</h1>
+      <p>Warehouse Inventory System</p>
+    </div>
+
+    <div id="login-error" class="alert alert-danger d-none py-2" style="font-size:0.85rem"></div>
+
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-user"></i></span>
+        <input type="text" id="login-username" class="form-control" placeholder="Enter username" autocomplete="username">
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Password</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+        <input type="password" id="login-password" class="form-control" placeholder="Enter password" autocomplete="current-password">
+      </div>
+    </div>
+
+    <button id="login-btn" class="btn btn-taobin w-100 py-2" onclick="login()">
+      <i class="fas fa-sign-in-alt me-2"></i>Login
+    </button>
+
+    <div class="text-center mt-3" style="font-size:0.75rem;color:#9ca3af">
+      Tao Bin Malaysia Sdn Bhd &copy; 2024 &bull; LAN Inventory v1.0
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APPLICATION
+     ============================================================ -->
+<div id="main-app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">☕</div>
+      <div class="sidebar-brand-text">
+        <h5>Tao Bin</h5>
+        <small>Inventory System</small>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="d-flex align-items-center gap-2">
+        <div class="user-avatar" id="sidebar-user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-user-name">Admin</div>
+          <div class="user-role" id="sidebar-user-role">admin</div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav list-unstyled mb-0">
+      <li class="nav-section-title">Main</li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+          Dashboard
+        </a>
+      </li>
+
+      <li class="nav-section-title">Inventory</li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="products" onclick="navigateTo('products')">
+          <span class="nav-icon"><i class="fas fa-boxes"></i></span>
+          Products
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="categories" onclick="navigateTo('categories')">
+          <span class="nav-icon"><i class="fas fa-tags"></i></span>
+          Categories
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="suppliers" onclick="navigateTo('suppliers')">
+          <span class="nav-icon"><i class="fas fa-truck"></i></span>
+          Suppliers
+        </a>
+      </li>
+
+      <li class="nav-section-title">Transactions</li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="stock-in" onclick="navigateTo('stock-in')">
+          <span class="nav-icon"><i class="fas fa-arrow-circle-down text-success"></i></span>
+          Stock IN
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="stock-out" onclick="navigateTo('stock-out')">
+          <span class="nav-icon"><i class="fas fa-arrow-circle-up text-danger"></i></span>
+          Stock OUT
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="transactions" onclick="navigateTo('transactions')">
+          <span class="nav-icon"><i class="fas fa-history"></i></span>
+          History
+          <span id="low-stock-badge" class="badge bg-danger" style="display:none"></span>
+        </a>
+      </li>
+
+      <li class="nav-section-title">Analytics</li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-page="reports" onclick="navigateTo('reports')">
+          <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+          Reports
+        </a>
+      </li>
+
+      <li class="nav-section-title nav-admin d-none">Admin</li>
+
+      <li class="nav-item nav-admin d-none">
+        <a class="nav-link" data-page="users" onclick="navigateTo('users')">
+          <span class="nav-icon"><i class="fas fa-users"></i></span>
+          Users
+        </a>
+      </li>
+
+      <li class="nav-section-title">Account</li>
+
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="modal" data-bs-target="#change-password-modal">
+          <span class="nav-icon"><i class="fas fa-key"></i></span>
+          Change Password
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" onclick="logout()">
+          <span class="nav-icon"><i class="fas fa-sign-out-alt text-danger"></i></span>
+          Logout
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div>
+        <h5 id="page-title" class="top-bar-title mb-0">Dashboard</h5>
+        <div id="page-date" class="top-bar-date"></div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary d-md-none" id="sidebar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+
+      <!-- ====================================================
+           DASHBOARD PAGE
+           ==================================================== -->
+      <div id="page-dashboard" class="page-section">
+        <!-- Low stock alert -->
+        <div id="low-stock-alert" class="alert-banner alert alert-warning" style="display:none">
+          <i class="fas fa-exclamation-triangle text-warning"></i>
+          <span></span>
+          <button class="btn btn-sm btn-warning ms-auto" onclick="navigateTo('products'); document.getElementById('product-low-stock-filter').checked=true; loadProducts()">View Items</button>
+        </div>
+
+        <!-- Stats row 1 -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#dbeafe">
+                <i class="fas fa-boxes" style="color:#1d4ed8"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-total-products">-</div>
+                <div class="stat-label">Total Products</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fef3c7">
+                <i class="fas fa-exclamation-triangle" style="color:#d97706"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-low-stock">-</div>
+                <div class="stat-label">Low Stock Items</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fee2e2">
+                <i class="fas fa-times-circle" style="color:#dc2626"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-out-of-stock">-</div>
+                <div class="stat-label">Out of Stock</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#d1fae5">
+                <i class="fas fa-dollar-sign" style="color:#059669"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" style="font-size:1.2rem" id="stat-inventory-value">-</div>
+                <div class="stat-label">Inventory Value</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats row 2 - Today -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#d1fae5">
+                <i class="fas fa-arrow-down" style="color:#059669"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-today-in">-</div>
+                <div class="stat-label">Today Stock IN</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fee2e2">
+                <i class="fas fa-arrow-up" style="color:#dc2626"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-today-out">-</div>
+                <div class="stat-label">Today Stock OUT</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts & tables row -->
+        <div class="row g-3">
+          <!-- Monthly chart -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-chart-bar me-2 text-primary"></i>Monthly Activity</h5>
+                <small class="text-muted">Last 6 months</small>
+              </div>
+              <div class="card-body" id="monthly-chart">
+                <div class="loading-spinner" style="width:24px;height:24px;margin:auto"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Category distribution -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <h5><i class="fas fa-chart-pie me-2 text-warning"></i>Inventory by Category</h5>
+              </div>
+              <div class="card-body" id="category-chart">
+                <div class="loading-spinner" style="width:24px;height:24px;margin:auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low stock table -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <h5><i class="fas fa-exclamation-circle me-2 text-danger"></i>Low Stock Alert</h5>
+                <button class="btn btn-sm btn-outline-danger" onclick="navigateTo('products'); document.getElementById('product-low-stock-filter').checked=true; loadProducts()">View All</button>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover table-sm mb-0">
+                    <thead>
+                      <tr><th>SKU</th><th>Name</th><th>Category</th><th>Stock</th><th>Reorder</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="low-stock-tbody">
+                      <tr><td colspan="6" class="text-center py-3 text-muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent transactions -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <h5><i class="fas fa-history me-2 text-info"></i>Recent Transactions</h5>
+                <button class="btn btn-sm btn-outline-info" onclick="navigateTo('transactions')">View All</button>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover table-sm mb-0">
+                    <thead>
+                      <tr><th>Tx No.</th><th>Type</th><th>Product</th><th>Qty</th><th>Time</th></tr>
+                    </thead>
+                    <tbody id="recent-tx-tbody">
+                      <tr><td colspan="5" class="text-center py-3 text-muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           PRODUCTS PAGE
+           ==================================================== -->
+      <div id="page-products" class="page-section">
+        <div class="filter-bar">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label mb-1">Search</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" id="product-search" class="form-control" placeholder="Search by name, SKU, barcode..." oninput="loadProducts()">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label mb-1">Category</label>
+              <select id="product-category-filter" class="form-select" onchange="loadProducts()">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <div class="form-check mt-3">
+                <input type="checkbox" class="form-check-input" id="product-low-stock-filter" onchange="loadProducts()">
+                <label class="form-check-label" for="product-low-stock-filter">Low Stock Only</label>
+              </div>
+            </div>
+            <div class="col-md-3 text-end">
+              <button class="btn btn-taobin" onclick="openAddProductModal()">
+                <i class="fas fa-plus me-1"></i> Add Product
+              </button>
+              <button class="btn btn-outline-secondary ms-1" onclick="loadProducts()">
+                <i class="fas fa-sync"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Products</h5>
+            <span id="products-count" class="badge bg-secondary">0 items</span>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>SKU</th><th>Name</th><th>Category</th>
+                    <th class="text-end">Stock</th><th class="text-end">Reorder</th>
+                    <th>Status</th><th class="text-end">Unit Cost</th>
+                    <th class="text-end">Value</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="products-tbody">
+                  <tr><td colspan="9" class="text-center py-4 text-muted">Loading products...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           CATEGORIES PAGE
+           ==================================================== -->
+      <div id="page-categories" class="page-section">
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-taobin" onclick="openAddCategoryModal()">
+            <i class="fas fa-plus me-1"></i> Add Category
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0"><i class="fas fa-tags me-2"></i>Categories</h5></div>
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Name</th><th>Description</th><th>Products</th><th>Actions</th></tr></thead>
+              <tbody id="categories-tbody">
+                <tr><td colspan="4" class="text-center py-3 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           SUPPLIERS PAGE
+           ==================================================== -->
+      <div id="page-suppliers" class="page-section">
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-taobin" onclick="openAddSupplierModal()">
+            <i class="fas fa-plus me-1"></i> Add Supplier
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0"><i class="fas fa-truck me-2"></i>Suppliers</h5></div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr><th>Name</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Address</th><th>Status</th></tr></thead>
+                <tbody id="suppliers-tbody">
+                  <tr><td colspan="6" class="text-center py-3 text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           STOCK IN PAGE
+           ==================================================== -->
+      <div id="page-stock-in" class="page-section">
+        <div class="row justify-content-center">
+          <div class="col-md-8 col-lg-6">
+            <div class="card">
+              <div class="card-header" style="background:var(--taobin-dark);color:#fff">
+                <h5 class="mb-0"><i class="fas fa-arrow-circle-down me-2"></i>Record Stock IN</h5>
+              </div>
+              <div class="card-body">
+                <form id="stock-in-form" onsubmit="e=>e.preventDefault()">
+                  <div class="mb-3">
+                    <label class="form-label">Product <span class="text-danger">*</span></label>
+                    <select id="si-product" class="form-select" onchange="onStockInProductChange()">
+                      <option value="">-- Select Product --</option>
+                    </select>
+                  </div>
+                  <div id="si-product-info"></div>
+                  <div class="row g-3">
+                    <div class="col-6">
+                      <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                      <input type="number" id="si-quantity" class="form-control" min="1" placeholder="Enter quantity">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label">Unit Cost (RM)</label>
+                      <input type="number" id="si-unit-cost" class="form-control" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                  </div>
+                  <div class="mb-3 mt-3">
+                    <label class="form-label">Reference No. (PO/DO Number)</label>
+                    <input type="text" id="si-reference" class="form-control" placeholder="e.g. PO-2024-001">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea id="si-notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                  </div>
+                  <button type="button" class="btn btn-success w-100 py-2" onclick="submitStockIn()">
+                    <i class="fas fa-plus-circle me-2"></i>Record Stock IN
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           STOCK OUT PAGE
+           ==================================================== -->
+      <div id="page-stock-out" class="page-section">
+        <div class="row justify-content-center">
+          <div class="col-md-8 col-lg-6">
+            <div class="card">
+              <div class="card-header" style="background:#7f1d1d;color:#fff">
+                <h5 class="mb-0"><i class="fas fa-arrow-circle-up me-2"></i>Record Stock OUT</h5>
+              </div>
+              <div class="card-body">
+                <form id="stock-out-form" onsubmit="e=>e.preventDefault()">
+                  <div class="mb-3">
+                    <label class="form-label">Product <span class="text-danger">*</span></label>
+                    <select id="so-product" class="form-select" onchange="onStockOutProductChange()">
+                      <option value="">-- Select Product --</option>
+                    </select>
+                  </div>
+                  <div id="so-product-info"></div>
+                  <div class="mb-3">
+                    <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <input type="number" id="so-quantity" class="form-control" min="1" placeholder="Enter quantity">
+                      <span class="input-group-text text-muted" id="so-max-qty"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Reference No. (Work Order / Request No.)</label>
+                    <input type="text" id="so-reference" class="form-control" placeholder="e.g. WO-2024-001">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea id="so-notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                  </div>
+                  <button type="button" class="btn btn-danger w-100 py-2" onclick="submitStockOut()">
+                    <i class="fas fa-minus-circle me-2"></i>Record Stock OUT
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           TRANSACTIONS PAGE
+           ==================================================== -->
+      <div id="page-transactions" class="page-section">
+        <div class="filter-bar">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label mb-1">Transaction Type</label>
+              <select id="tx-type-filter" class="form-select" onchange="pagination.transactions.offset=0; loadTransactions()">
+                <option value="">All Types</option>
+                <option value="IN">Stock IN</option>
+                <option value="OUT">Stock OUT</option>
+                <option value="ADJUSTMENT">Adjustment</option>
+                <option value="RETURN">Return</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label mb-1">From Date</label>
+              <input type="date" id="tx-start-date" class="form-control" onchange="pagination.transactions.offset=0; loadTransactions()">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label mb-1">To Date</label>
+              <input type="date" id="tx-end-date" class="form-control" onchange="pagination.transactions.offset=0; loadTransactions()">
+            </div>
+            <div class="col-md-3 text-end">
+              <button class="btn btn-outline-secondary" onclick="pagination.transactions.offset=0; loadTransactions()">
+                <i class="fas fa-search me-1"></i> Filter
+              </button>
+              <button class="btn btn-outline-danger ms-1" onclick="document.getElementById('tx-type-filter').value=''; document.getElementById('tx-start-date').value=''; document.getElementById('tx-end-date').value=''; pagination.transactions.offset=0; loadTransactions()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0"><i class="fas fa-history me-2"></i>Transaction History</h5></div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Tx No.</th><th>Type</th><th>Product</th>
+                    <th class="text-end">Qty</th><th class="text-end">Unit Cost</th>
+                    <th class="text-end">Total</th><th>By</th><th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="transactions-tbody">
+                  <tr><td colspan="8" class="text-center py-4 text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer d-flex align-items-center flex-wrap gap-2">
+            <div id="tx-pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           REPORTS PAGE
+           ==================================================== -->
+      <div id="page-reports" class="page-section">
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+          <button id="report-tab-inventory" class="btn btn-outline-primary report-tab active" onclick="showInventoryReport()">
+            <i class="fas fa-clipboard-list me-1"></i> Inventory Report
+          </button>
+          <button id="report-tab-transactions" class="btn btn-outline-primary report-tab" onclick="showTransactionReport()">
+            <i class="fas fa-exchange-alt me-1"></i> Transaction Report
+          </button>
+          <button class="btn btn-outline-secondary ms-auto" onclick="window.print()">
+            <i class="fas fa-print me-1"></i> Print
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-body" id="report-content">
+            <div class="text-center text-muted py-4">Loading report...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           USERS PAGE
+           ==================================================== -->
+      <div id="page-users" class="page-section">
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-taobin" onclick="openAddUserModal()">
+            <i class="fas fa-user-plus me-1"></i> Add User
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5></div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Email</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                <tbody id="users-tbody">
+                  <tr><td colspan="7" class="text-center py-3 text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </div><!-- end main-content -->
+</div><!-- end main-app -->
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Product Modal -->
+<div class="modal fade" id="product-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="product-modal-title">Add Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="product-id">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">SKU</label>
+            <input type="text" id="f-product-sku" class="form-control" placeholder="Auto-generated if empty">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Product Name <span class="text-danger">*</span></label>
+            <input type="text" id="f-product-name" class="form-control" placeholder="Enter product name">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <select id="f-product-category" class="form-select"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Supplier</label>
+            <select id="f-product-supplier" class="form-select"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Unit</label>
+            <select id="f-product-unit" class="form-select">
+              <option value="pcs">Pieces (pcs)</option>
+              <option value="box">Box</option>
+              <option value="kg">Kilogram (kg)</option>
+              <option value="litre">Litre (L)</option>
+              <option value="pack">Pack</option>
+              <option value="roll">Roll</option>
+              <option value="set">Set</option>
+              <option value="unit">Unit</option>
+              <option value="bottle">Bottle</option>
+              <option value="bag">Bag</option>
+              <option value="carton">Carton</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Location / Rack</label>
+            <input type="text" id="f-product-location" class="form-control" placeholder="e.g. A-01, Shelf B3">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Unit Cost (RM)</label>
+            <input type="number" id="f-product-unit-cost" class="form-control" min="0" step="0.01" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Selling Price (RM)</label>
+            <input type="number" id="f-product-selling-price" class="form-control" min="0" step="0.01" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Initial Stock</label>
+            <input type="number" id="f-product-current-stock" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Min Stock</label>
+            <input type="number" id="f-product-min-stock" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Reorder Point</label>
+            <input type="number" id="f-product-reorder" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Max Stock</label>
+            <input type="number" id="f-product-max-stock" class="form-control" min="0" value="9999">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Barcode</label>
+            <input type="text" id="f-product-barcode" class="form-control" placeholder="Optional barcode">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea id="f-product-description" class="form-control" rows="2" placeholder="Optional description"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-taobin" onclick="saveProduct()">
+          <i class="fas fa-save me-1"></i> Save Product
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product View Modal -->
+<div class="modal fade" id="product-view-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="view-product-title">Product Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="view-product-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal fade" id="category-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="category-modal-title">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="category-id">
+        <form id="category-form">
+          <div class="mb-3">
+            <label class="form-label">Category Name <span class="text-danger">*</span></label>
+            <input type="text" id="f-category-name" class="form-control" placeholder="Enter category name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="f-category-description" class="form-control" rows="2" placeholder="Optional description"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-taobin" onclick="saveCategory()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="supplier-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supplier-modal-title">Add Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="supplier-id">
+        <form id="supplier-form">
+          <div class="mb-3">
+            <label class="form-label">Supplier Name <span class="text-danger">*</span></label>
+            <input type="text" id="f-supplier-name" class="form-control" placeholder="Enter supplier name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contact Person</label>
+            <input type="text" id="f-supplier-contact" class="form-control">
+          </div>
+          <div class="row g-2">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Phone</label>
+              <input type="text" id="f-supplier-phone" class="form-control" placeholder="e.g. +60 12-345 6789">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="f-supplier-email" class="form-control">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea id="f-supplier-address" class="form-control" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-taobin" onclick="saveSupplier()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="user-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="user-modal-title">Add User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="user-id">
+        <form id="user-form">
+          <div id="user-password-group">
+            <div class="mb-3">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input type="text" id="f-user-username" class="form-control" autocomplete="off">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password <span class="text-danger">*</span></label>
+              <input type="password" id="f-user-password" class="form-control" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="f-user-fullname" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select id="f-user-role" class="form-select">
+              <option value="staff">Staff</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" id="f-user-email" class="form-control">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-taobin" onclick="saveUser()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="change-password-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-key me-2"></i>Change Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="change-password-form">
+          <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input type="password" id="cp-current" class="form-control" autocomplete="current-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" id="cp-new" class="form-control" autocomplete="new-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" id="cp-confirm" class="form-control" autocomplete="new-password">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-taobin" onclick="changePassword()">Change Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Bootstrap JS (vendored for LAN use) -->
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- App JS -->
+<script src="/js/app.js"></script>
+</body>
+</html>
